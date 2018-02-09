@@ -1,15 +1,60 @@
 #!/usr/bin/env python3
-
+from threading import * 
 from socket import *
 from sys import argv
 
 ip_server = "127.0.0.1"
-port_ip = "8081"
+port_server = 8081
 
 ip_proxy = "127.0.0.1"
-port_proxy = "8082"
+port_proxy = 8082
+
+delay = 0.3
+#def handle_proxy():# le proxy se connecte au server
 
 
+def connexion_server(): # proxy connecte to server
+    try :
+        clientSocket = socket(AF_INET,SOCK_STREAM)
+        clientSocket.connect((ip_server,port_server))
+        return clientSocket
+    except :
+        raise
+
+    
+
+def handle_server(socketClient,addressclient,socketproxy):
+    try : 
+        message = socketClient.recv(1024)
+        socketproxy.sendall(message) # envoi server
+        while 1 :
+            socketproxy.settimeout(delay)
+            message =  socketproxy.recv(1024)
+            socketClient.sendall(message)
+            if(len(message) == 0):
+                break
+        socketClient.close()
+        socketproxy.close()
+           
+    except  :
+        socketClient.close()
+        socketproxy.close()
+        raise
+
+def handle_client(connectionSocket,address):# thread client  avoir l adress client
+    try :
+        socketserver = connexion_server()
+        Thread(target=handle_server, args=(connectionSocket,address,socketserver, )).start()
+
+    except : # je dois enlever raise 
+        if(connectionSocket != None):
+            try :
+                connectionSocket.close()
+            except error :
+                raise 
+        raise
+
+    
 
 
 
@@ -31,16 +76,8 @@ if __name__ == '__main__':
     while 1 :
         try :
             connectionSocket, address = serverSocket.accept()
-            print("connection :")
-            message = connectionSocket.recv(1024)
-            
-            file  = message[5:13] # file toto.txt localhost:8080/toto.txt
-            with open(file) as f:
-                read_data = f.read()
-                print("message to send : ",read_data)
-                connectionSocket.send(messageOk.encode('utf-8')+read_data.encode('utf-8'))
-                connectionSocket.close()
-        except:
+            Thread(target=handle_client, args=(connectionSocket,address, )).start()
+        except KeyboardInterrupt :
             print("execption")
-            connectionSocket.send(messagenotFound.encode('utf-8'))
             connectionSocket.close()
+            raise 

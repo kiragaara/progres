@@ -29,7 +29,7 @@ def handle_client_proxy(connectionSocket, address):# thread pour chaque connexio
             send_file(connectionSocket,file)
         else :
             connectionSocket.send(messagenotFound.encode('utf-8'))
-            connectionSocket.close()
+        connectionSocket.close()
     except : # je dois enlever raise 
         if(connectionSocket != None):
             try :
@@ -92,9 +92,10 @@ if __name__ == '__main__':
     while True :
         try :
             connectionSocket, address = serverSocket.accept()
-            print("connection :")
+            print("connection : server")
             Thread(target=handle_client_proxy, args=(connectionSocket,address, )).start()
         except KeyboardInterrupt :
             raise
-        except error as e  :
+        except   :
+            connectionSocket.close()
             print(e)
