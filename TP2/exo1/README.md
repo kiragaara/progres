@@ -3,7 +3,7 @@
 by default the proxy listens on port 8082 and bind at address 127.0.0.1 
 by default the server listens on port 8081 and bind at address 127.0.0.1 
 
-
+all file that you can get from the server are located in " folder/ "
 
 ### Prerequisites
 python3 
