@@ -25,7 +25,7 @@ def handle_client_proxy(connectionSocket, address):# thread pour chaque connexio
         message = connectionSocket.recv(1024)
         print(message)
         file = get_file_request(message)
-        if exist_file(file) :
+        if (exist_file(file)) :
             send_file(connectionSocket,file)
         else :
             connectionSocket.send(messagenotFound.encode('utf-8'))
@@ -34,7 +34,7 @@ def handle_client_proxy(connectionSocket, address):# thread pour chaque connexio
         if(connectionSocket != None):
             try :
                 connectionSocket.close()
-            except error :
+            except :
                 raise 
         raise
 
@@ -94,7 +94,7 @@ if __name__ == '__main__':
             connectionSocket, address = serverSocket.accept()
             print("connection : server")
             Thread(target=handle_client_proxy, args=(connectionSocket,address, )).start()
-        except KeyboardInterrupt :
+        except KeyboardInterrupt : # pour que ça arrete le programe quand je tape ctrl-c 
             raise
         except   :
             connectionSocket.close()

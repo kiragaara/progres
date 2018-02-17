@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 from threading import * 
 from socket import *
-from sys import argv
+from sys import argv, exit 
 
+# par defaut le proxy et lier au server avec comme adress ip_server et port_server qui est 80
 ip_server = "127.0.0.1"
-port_server = 8081
+port_server = 80
 
+# ip proxy et port proxy
 ip_proxy = "127.0.0.1"
 port_proxy = 8082
 
@@ -23,7 +25,7 @@ def connexion_server(): # proxy connecte to server
 
     
 
-def handle_server(socketClient,addressclient,socketproxy):
+def handle_server(socketClient,addressclient,socketproxy):# le proxy peut demander plusieur connexion au server 
     try : 
         message = socketClient.recv(1024)
         socketproxy.sendall(message) # envoi server
@@ -54,23 +56,23 @@ def handle_client(connectionSocket,address):# thread client  avoir l adress clie
                 raise 
         raise
 
-    
-
-
 
 if __name__ == '__main__':
 
     if(len(argv) == 3):
-        ip_server = argv[1]
-        serverPort = int(argv[2])
-        
-
+        try:
+            ip_server = argv[1]
+            serverPort = int(argv[2])
+        except ValueError :
+            print("arg[1] : ip server arg[2]: port server")
+            exit(1)
+            
     serverPort = 8081
     serverSocket = socket(AF_INET,SOCK_STREAM)
     serverSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     serverSocket.bind((ip_proxy,port_proxy))
     serverSocket.listen(6)
-
+    connectionSocket = None
 
 
     while 1 :
@@ -78,6 +80,6 @@ if __name__ == '__main__':
             connectionSocket, address = serverSocket.accept()
             Thread(target=handle_client, args=(connectionSocket,address, )).start()
         except KeyboardInterrupt :
-            print("execption")
-            connectionSocket.close()
+            if connectionSocket != None : 
+                connectionSocket.close()
             raise 
